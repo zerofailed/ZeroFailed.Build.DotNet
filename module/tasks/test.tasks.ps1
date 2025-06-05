@@ -7,6 +7,7 @@
 # Synopsis: Run .NET solution tests with 'dotnet-coverage' code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     # Setup the appropriate CI/CD platform test logger, unless explicitly disabled
+    Write-Verbose "DotNetTestLoggers-Before: $(ConvertTo-Json $DotNetTestLoggers)" -Verbose
     if (!$DisableCicdServerLogger) {
         if ($script:IsAzureDevOps) {
             Write-Build Green "Configuring Azure Pipelines test logger"
@@ -17,6 +18,7 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
             $DotNetTestLoggers += "GitHubActions"
         }    
     }
+    Write-Verbose "DotNetTestLoggers-After: $(ConvertTo-Json $DotNetTestLoggers)" -Verbose
 
     # Evaluate the file logger properties so we can pass them to 'dotnet test'
     $_fileLoggerProps = Resolve-Value $DotNetTestFileLoggerProps
@@ -39,7 +41,7 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
 
     # Configure any test loggers that have been specified
     $DotNetTestLoggers | ForEach-Object {
-        Write-Build White "Configuring logger: $_"
+        Write-Verbose "Adding logger: $_" -Verbose
         $dotnetTestArgs += @("--logger", $_)
     }
 
