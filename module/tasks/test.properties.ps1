@@ -34,14 +34,14 @@ $ReportGeneratorToolVersion = "5.3.8"
 # Synopsis: Allows the type of reports produced by the 'dotnet-reportgenerator-globaltool' to be customised. Defaults to "HtmlInline".
 $TestReportTypes ??= "HtmlInline"
 
-# Logging Options
-$_defaultDotNetTestLogger = "console;verbosity=$LogLevel"       # we store this so we can tell whether 'DotNetTestLogger' has been customised
-
 # Synopsis: Sets the default '--logger' configuration passed to 'dotnet test'.
-$DotNetTestLogger = $_defaultDotNetTestLogger
+$DotNetTestLoggers = @(
+    "console;verbosity=$LogLevel"
+    "trx;LogFilePrefix=test-results"
+)
 
-# Synopsis: Allows multiple '--logger' configurations to be passed to 'dotnet test'. Overrides 'DotNetTestLogger'.
-$DotNetTestLoggers = @()
+# Synopsis: When true, the CI/CD-specific loggers will not be used (e.g. Azure DevOps, GitHub Actions)
+$DisableCicdServerLogger = $false
 
 # Synopsis: The path to the MSBuild log file produced when running tests via 'dotnet test'. Defaults to "dotnet-test.log".
 $DotNetTestLogFile = "dotnet-test.log"

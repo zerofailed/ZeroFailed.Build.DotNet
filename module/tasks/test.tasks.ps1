@@ -6,15 +6,15 @@
 
 # Synopsis: Run .NET solution tests with 'dotnet-coverage' code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
-    # Only setup the default CI/CD platform test loggers if they haven't already been customised
-    if ($DotNetTestLoggers.Count -eq 0 -and $DotNetTestLogger -eq $_defaultDotNetTestLogger) {
+    # Setup the appropriate CI/CD platform test logger, unless explicitly disabled
+    if (!$DisableCicdServerLogger) {
         if ($script:IsAzureDevOps) {
             Write-Build Green "Configuring Azure Pipelines test logger"
-            $DotNetTestLogger = "AzurePipelines"
+            $script:DotNetTestLoggers += "AzurePipelines"
         }
         elseif ($script:IsGitHubActions) {
             Write-Build Green "Configuring GitHub Actions test logger"
-            $DotNetTestLogger = "GitHubActions"
+            $script:DotNetTestLoggers += "GitHubActions"
         }    
     }
 
@@ -37,15 +37,9 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         ($_fileLoggerProps ? $_fileLoggerProps : "/fl")
     )
 
-    # If multiple test loggers have been specified then use that newer config property
-    if ($DotNetTestLoggers.Count -gt 0) {
-        $DotNetTestLoggers | ForEach-Object {
-            $dotnetTestArgs += @("--logger", $_)
-        }
-    }
-    # Otherwise fallback to the original behaviour so we are backwards-compatible
-    else {
-        $dotnetTestArgs += @("--logger", $DotNetTestLogger)
+    # Configure any test loggers that have been specified
+    $DotNetTestLoggers | ForEach-Object {
+        $dotnetTestArgs += @("--logger", $_)
     }
 
     $coverageOutput = "coverage{0}.cobertura.xml" -f ($TargetFrameworkMoniker ? ".$TargetFrameworkMoniker" : "")
@@ -71,7 +65,7 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         "dotnet"
         "test"
     )
-    Write-Build Magenta "CmdLine: $dotnetCoverageArgs $SolutionToBuild $dotnetTestArgs"
+    Write-Verbose "CmdLine: $dotnetCoverageArgs $SolutionToBuild $dotnetTestArgs" -Verbose
     try {
         exec { 
             & dotnet-coverage @dotnetCoverageArgs $SolutionToBuild @dotnetTestArgs
