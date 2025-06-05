@@ -37,15 +37,10 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         ($_fileLoggerProps ? $_fileLoggerProps : "/fl")
     )
 
-    # If multiple test loggers have been specified then use that newer config property
-    if ($DotNetTestLoggers.Count -gt 0) {
-        $DotNetTestLoggers | ForEach-Object {
-            $dotnetTestArgs += @("--logger", $_)
-        }
-    }
-    # Otherwise fallback to the original behaviour so we are backwards-compatible
-    else {
-        $dotnetTestArgs += @("--logger", $DotNetTestLogger)
+    # Configure any test loggers that have been specified
+    $DotNetTestLoggers | ForEach-Object {
+        Write-Build White "Configuring logger: $_"
+        $dotnetTestArgs += @("--logger", $_)
     }
 
     $coverageOutput = "coverage{0}.cobertura.xml" -f ($TargetFrameworkMoniker ? ".$TargetFrameworkMoniker" : "")
