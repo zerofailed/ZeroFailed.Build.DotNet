@@ -6,15 +6,15 @@
 
 # Synopsis: Run .NET solution tests with 'dotnet-coverage' code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
-    # Only setup the default CI/CD platform test loggers if they haven't already been customised
-    if ($DotNetTestLoggers.Count -eq 0 -and $DotNetTestLogger -eq $_defaultDotNetTestLogger) {
+    # Setup the appropriate CI/CD platform test logger, unless explicitly disabled
+    if (!$DisableCicdServerLogger) {
         if ($script:IsAzureDevOps) {
             Write-Build Green "Configuring Azure Pipelines test logger"
-            $DotNetTestLogger = "AzurePipelines"
+            $DotNetTestLoggers += "AzurePipelines"
         }
         elseif ($script:IsGitHubActions) {
             Write-Build Green "Configuring GitHub Actions test logger"
-            $DotNetTestLogger = "GitHubActions"
+            $DotNetTestLoggers += "GitHubActions"
         }    
     }
 
