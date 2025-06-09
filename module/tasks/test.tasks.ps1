@@ -70,13 +70,8 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         exec { 
             & dotnet-coverage @dotnetCoverageArgs $SolutionToBuild @dotnetTestArgs
         }
-    }
-    finally {
-        if ((Test-Path $DotNetTestLogFile) -and $IsAzureDevOps) {
-            Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
-        }
 
-        # Generate test report file
+        # Only generate code coverage reports if the tests passed
         if (!$SkipTestReport -and (Test-Path $coverageOutput)) {
             if ($GenerateTestReport) {
                 Write-Build White "Generating additional test reports: $TestReportTypes"
@@ -95,6 +90,11 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
                     -IncludeAssemblyFilter $IncludeAssembliesInCodeCoverage `
                     -ExcludeAssemblyFilter $ExcludeAssembliesInCodeCoverage
             }
+        }
+    }
+    finally {
+        if ((Test-Path $DotNetTestLogFile) -and $IsAzureDevOps) {
+            Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
         }
     }
 }
