@@ -2,7 +2,7 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
-# Synopsis: The version of the COvenant .NET global tool to install
+# Synopsis: The version of the Covenant .NET global tool to install
 $covenantVersion = "0.20.0"
 
 # Synopsis: When true, an SPDX-formatted SBOM will be generated from the Covenant report 
