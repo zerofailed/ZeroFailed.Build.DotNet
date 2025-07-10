@@ -28,7 +28,8 @@
   Generates a Markdown code coverage report with GitHub-specific formatting.
 #>
 function _GenerateCodeCoverageMarkdownReport {
-    param(
+    [CmdletBinding()]
+    param (
         [Parameter()]
         [bool]$UseGitHubFlavour,
 
