@@ -1,6 +1,11 @@
 # ZeroFailed.Build.DotNet
 
-A [ZeroFailed](https://github.com/endjin/ZeroFailed) extension containing features that support build processes for .NET projects.
+[![Build Status](https://github.com/zerofailed/ZeroFailed.Build.DotNet/actions/workflows/build.yml/badge.svg)](https://github.com/zerofailed/ZeroFailed.Build.DotNet/actions/workflows/build.yml)  
+[![GitHub Release](https://img.shields.io/github/release/endjin/ZeroFailed.Build.DotNet.svg)](https://github.com/zerofailed/ZeroFailed.Build.DotNet/releases)  
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/ZeroFailed.Build.DotNet?color=blue)](https://www.powershellgallery.com/packages/ZeroFailed.Build.DotNet)  
+[![License](https://img.shields.io/github/license/endjin/ZeroFailed.Build.DotNet.svg)](https://github.com/zerofailed/ZeroFailed.Build.DotNet/blob/main/LICENSE)
+
+A [ZeroFailed](https://github.com/zerofailed/ZeroFailed) extension containing features that support build processes for .NET projects.
 
 ## Overview
 
@@ -14,7 +19,14 @@ For more information about the different component types, please refer to the [Z
 
 This extension consists of the following feature groups, click the links to see their documentation:
 
-- Compilation using `dotnet build`
-- Testing & Code Coverage using `dotnet test` & `dotnet-coverage`
-- Packaging using `dotnet pack` & `dotnet publish`
-- Publishing NuGet packages using `dotnet nuget push`
+- Compilation
+- Testing
+- SBOM generation
+- Packaging
+- Publishing
+
+## Dependencies
+
+| Extension                | Reference Type | Version |
+|--------------------------|----------------|---------|
+| [ZeroFailed.Build.Common](https://github.com/zerofailed/ZeroFailed.Build.Common) | git            | `main`  |
