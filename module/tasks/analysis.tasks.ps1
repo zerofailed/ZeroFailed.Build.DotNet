@@ -2,6 +2,8 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
+. $PSScriptRoot/analysis.properties.ps1
+
 # Synopsis: Installs the Covenant .NET global tool
 task InstallCovenantTool {
     Install-DotNetTool -Name covenant -Version $covenantVersion
