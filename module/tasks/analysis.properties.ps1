@@ -9,7 +9,7 @@ $covenantVersion = "0.20.0"
 $CovenantIncludeSpdxReport = $true
 
 # Synopsis: When true, an CycloneDx-formatted SBOM will be generated from the Covenant report
-$CovenantIncludeCycloneDxReport = $true
+$CovenantIncludeCycloneDxReport = $false
 
 # Synopsis: A hashtable of additional metadata to be included in the Covenant report
 $CovenantMetadata = @{
