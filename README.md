@@ -30,6 +30,7 @@ The diagram below shows the discrete features and when they run as part of the d
 ```mermaid
 kanban
     init
+    version
     build
         dnbuild[Build .NET solution]
     test
