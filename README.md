@@ -17,7 +17,7 @@ A [ZeroFailed](https://github.com/zerofailed/ZeroFailed) extension containing fe
 
 For more information about the different component types, please refer to the [ZeroFailed documentation](https://github.com/zerofailed/ZeroFailed/blob/main/README.md#extensions).
 
-This extension consists of the following feature groups:
+This extension consists of the following feature groups, refer to the [HELP page](./HELP.md) for more details.
 
 - Compilation
 - Testing
