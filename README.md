@@ -31,18 +31,17 @@ The diagram below shows the discrete features and when they run as part of the d
 kanban
     init
     build
-        dnbuild[dotnet build *sln-file*]
+        dnbuild[Build .NET solution]
     test
-        dncoverage[dotnet-coverage]
-        dntest[dotnet test *sln-file*]
-        dnrepgen[dotnet-reportgenerator]
+        dntest[Run tests with code coverage]
+        dnrepgen[Generate test report]
     analysis
-        runcovenant[dotnet-covenant]
+        runcovenant[Generate SBOM for solution]
     package
-        dnpack[dotnet pack *sln-file*]
-        dnpublish[dotnet publish *projects*]
+        dnpack[Build NuGet packages]
+        dnpublish[Build project publish packages]
     publish
-        dnpub[dotnet nuget push]
+        dnpub[Publish NuGet packages]
 ```
 
 ## Pre-Requisites
