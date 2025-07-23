@@ -12,15 +12,6 @@ $SkipNuspecPackages = $false
 $SkipProjectPublishPackages = $false
 
 # Synopsis: An array containing details of each project that require 'dotnet publish' to be run.
-# Each entry should either a string with the path to the project or, for more complex scenarios, a hashtable with the following structure:
-# @{
-#   Project = "<path-to-project-file>"
-#   RuntimeIdentifiers = @(<list-of-RIDs>)
-#   SelfContained = <bool>
-#   Trimmed = <bool>
-#   ReadyToRun = <bool>
-#   SingleFile = <bool>
-# }
 $ProjectsToPublish = @()
 
 # Synopsis: An array containing the path to each '.nuspec' file that require 'dotnet pack' to be run.

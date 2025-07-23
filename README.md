@@ -25,7 +25,7 @@ This extension consists of the following feature groups:
 - NuGet & Application Packaging
 - NuGet Publishing
 
-The diagram below shows the discrete features and when they run as part of the default process provided by [ZeroFailed.Build.Common](https://github.com/zerofailed/ZeroFailed.Build.Common).
+The diagram below shows the discrete features and when they run as part of the default build process provided by [ZeroFailed.Build.Common](https://github.com/zerofailed/ZeroFailed.Build.Common).
 
 ```mermaid
 kanban

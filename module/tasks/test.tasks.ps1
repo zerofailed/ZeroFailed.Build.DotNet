@@ -4,7 +4,7 @@
 
 . $PSScriptRoot/test.properties.ps1
 
-# Synopsis: Run .NET solution tests with 'dotnet-coverage' code coverage
+# Synopsis: Run .NET solution tests with 'dotnet-coverage' to collect code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     # Setup the appropriate CI/CD platform test logger, unless explicitly disabled
     if (!$DisableCicdServerLogger) {
