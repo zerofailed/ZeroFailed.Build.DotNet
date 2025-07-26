@@ -17,10 +17,10 @@ $AdditionalTestArgs = @()
 $TargetFrameworkMoniker = ""
 
 # Synopsis: An optional wildcard expression filter for assemblies that should be included in the code coverage report. Defaults to no filter.
-$IncludeAssembliesInCodeCoverage = ""                # used by 'dotnet-reportgeneator' global tool
+$IncludeAssembliesInCodeCoverage = ""
 
 # Synopsis: An optional wildcard expression filter for assemblies that should be excluded from the code coverage report. Defaults to no filter.
-$ExcludeAssembliesInCodeCoverage = ""                # used by 'dotnet-reportgeneator' global tool
+$ExcludeAssembliesInCodeCoverage = ""
 
 # Synopsis: When true, runs the 'dotnet-reportgenerator-globaltool' to generate an XML test report. Defaults to true.
 $GenerateTestReport = $true

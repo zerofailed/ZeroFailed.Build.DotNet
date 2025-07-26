@@ -21,7 +21,7 @@ $templateProjectForNuSpecBuild = @"
 </Project>
 "@
 
-# Synopsis: Build .NET solution packages
+# Synopsis: Build the NuGet packages configured in the .NET solution
 task BuildNuGetPackages -If {!$SkipNuGetPackages -and $SolutionToBuild} -After PackageCore Version,EnsurePackagesDir,{
     exec {
         try {
@@ -47,7 +47,7 @@ task BuildNuGetPackages -If {!$SkipNuGetPackages -and $SolutionToBuild} -After P
     }
 }
 
-# Synopsis: Build publish packages for selected projects
+# Synopsis: Build publish packages for projects specified in 'ProjectsToPublish'
 task BuildProjectPublishPackages -If {!$SkipProjectPublishPackages -and $ProjectsToPublish} -After PackageCore Version,EnsurePackagesDir,{
     # Remove the existing log, since we append to it for each project being published
     Get-Item $DotNetPublishLogFile -ErrorAction Ignore | Remove-Item -Force
@@ -113,7 +113,7 @@ task BuildProjectPublishPackages -If {!$SkipProjectPublishPackages -and $Project
     }
 }
 
-# Synopsis: Build any .nuspec based NuGet Packages
+# Synopsis: Build NuGet packages for the .nuspec files specified in 'NuspecFilesToPackage'
 task BuildNuSpecPackages -If {!$SkipNuspecPackages -and $NuspecFilesToPackage} -After PackageCore Version,EnsurePackagesDir,{
 
     # Evaluate the file logger properties so we can pass them to 'dotnet pack'
