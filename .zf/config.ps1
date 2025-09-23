@@ -12,6 +12,7 @@ $zerofailedExtensions = @(
 
 # Set the required build options
 $PesterTestsDir = "$here/module"
+$PesterCodeCoverageEnabled = $false     # this extension contains no exported functions
 $PowerShellModulesToPublish = @(
     @{
         ModulePath = "$here/module/ZeroFailed.Build.DotNet.psd1"
