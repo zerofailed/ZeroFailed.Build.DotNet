@@ -33,6 +33,7 @@ task RunCovenantTool -If { $SolutionToBuild } Version,
     Write-Verbose "covenantHtmlReportFile: $covenantHtmlReportFile"
 
     # Generate SBOM
+    Set-Location (Split-Path -Parent $SolutionToBuild)
     exec {
         & dotnet-covenant `
                     generate `
