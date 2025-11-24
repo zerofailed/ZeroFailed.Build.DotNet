@@ -57,7 +57,6 @@ $DisableCicdServerLogger = $false
 # Synopsis: The path to the MSBuild log file produced when running tests via 'dotnet test'. Defaults to "dotnet-test.log".
 $DotNetTestLogFile = "dotnet-test.log"
 
-# Synopsis: Allow the file logger properties used when running tests via 'dotnet test' to be customised. Defaults to "/flp:verbosity=<DotNetFileLoggerVerbosity>;logfile=<DotNetTestLogFile>". Supports lazy evaluation.
 $DotNetTestFileLoggerProps_VSTest = "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetTestLogFile"
 $DotNetTestFileLoggerProps_MTP = {
     @(
@@ -76,6 +75,7 @@ $DotNetTestFileLoggerProps_MTP = {
         $here
     )
 }
+# Synopsis: Allow the file logger properties used when running tests via 'dotnet test' to be customised. Defaults to "/flp:verbosity=<DotNetFileLoggerVerbosity>;logfile=<DotNetTestLogFile>". Supports lazy evaluation.
 $DotNetTestFileLoggerProps = {
     if ($isMtp) {
         Resolve-Value $DotNetTestFileLoggerProps_MTP
