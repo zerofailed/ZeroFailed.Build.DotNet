@@ -27,19 +27,50 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     $moduleDir = Split-Path -Parent (Split-Path -Parent $Task.InvocationInfo.ScriptName)
     Write-Verbose "ModuleDir: $moduleDir"
 
+    # Detect Microsoft Testing Platform (MTP) usage
+    $isMtp = $false
+    try {
+        $helpOutput = & dotnet test $SolutionToBuild --help 2>&1 | Out-String
+        if ($helpOutput -match "\.NET Test Command for Microsoft\.Testing\.Platform") {
+            $isMtp = $true
+            Write-Build Cyan "Microsoft Testing Platform detected."
+        }
+    }
+    catch {
+        Write-Verbose "Failed to detect testing platform via help command. Assuming VSTest."
+    }
+
     # Setup the arguments we need to pass to 'dotnet test'
     $dotnetTestArgs = @(
         "--configuration", $Configuration
         "--no-build"
         "--no-restore"
         "--verbosity", $LogLevel
-        "--test-adapter-path", (Join-Path $moduleDir "bin")
-        ($_fileLoggerProps ? $_fileLoggerProps : "/fl")
     )
 
+    if (-not $isMtp) {
+        $dotnetTestArgs += "--test-adapter-path", (Join-Path $moduleDir "bin")
+        $dotnetTestArgs += ($_fileLoggerProps ? $_fileLoggerProps : "/fl")
+    }
+
     # Configure any test loggers that have been specified
-    $DotNetTestLoggers | ForEach-Object {
-        $dotnetTestArgs += @("--logger", $_)
+    if ($isMtp) {
+        $DotNetTestLoggers | ForEach-Object {
+            if ($_ -match "^trx") {
+                $dotnetTestArgs += "--report-trx"
+                if ($_ -match "LogFilePrefix=([^;]+)") {
+                     $dotnetTestArgs += "--report-trx-filename", "$($matches[1]).trx"
+                }
+            }
+            elseif ($_ -eq "AzurePipelines") {
+                $dotnetTestArgs += "--report-azdo"
+            }
+        }
+    }
+    else {
+        $DotNetTestLoggers | ForEach-Object {
+            $dotnetTestArgs += @("--logger", $_)
+        }
     }
 
     $coverageOutput = "coverage{0}.cobertura.xml" -f ($TargetFrameworkMoniker ? ".$TargetFrameworkMoniker" : "")
@@ -65,10 +96,23 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         "dotnet"
         "test"
     )
-    Write-Verbose "CmdLine: $dotnetCoverageArgs $SolutionToBuild $dotnetTestArgs" -Verbose
+
+    # Prepare target arguments
+    $targetArgs = @()
+    if ($isMtp) {
+        if ($SolutionToBuild -match "\.slnx?$") {
+            $targetArgs += "--solution", $SolutionToBuild
+        } else {
+            $targetArgs += "--project", $SolutionToBuild
+        }
+    } else {
+        $targetArgs += $SolutionToBuild
+    }
+
+    Write-Verbose "CmdLine: $dotnetCoverageArgs $targetArgs $dotnetTestArgs" -Verbose
     try {
         exec { 
-            & dotnet-coverage @dotnetCoverageArgs $SolutionToBuild @dotnetTestArgs
+            & dotnet-coverage @dotnetCoverageArgs @targetArgs @dotnetTestArgs
         }
 
         # Only generate code coverage reports if the tests passed
