@@ -63,11 +63,11 @@ $DotNetTestFileLoggerProps_MTP = {
         '--diagnostic'
         '--diagnostic-verbosity'
         $(switch ($DotNetFileLoggerVerbosity) {
-            'Quiet' { 'Critical' }
-            'Minimal' { 'Error' }
-            'Normal' { 'Warning' }
-            'Detailed' { 'Information' }
-            'Diagnostic' { 'Trace' }
+            'quiet' { 'Critical' }
+            'minimal' { 'Error' }
+            'normal' { 'Warning' }
+            'detailed' { 'Information' }
+            'diagnostic' { 'Trace' }
         })
         '--diagnostic-output-fileprefix'
         'dotnet-test'

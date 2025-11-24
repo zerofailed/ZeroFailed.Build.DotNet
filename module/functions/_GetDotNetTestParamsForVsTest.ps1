@@ -23,7 +23,7 @@ function _GetDotNetTestParamsForVsTest {
         "--verbosity", $LogLevel
     )
 
-    $DotNetTestLoggers | ForEach-Object {
+    $_resolvedLoggers | ForEach-Object {
         $dotnetTestArgs += @("--logger", $_)
     }
 

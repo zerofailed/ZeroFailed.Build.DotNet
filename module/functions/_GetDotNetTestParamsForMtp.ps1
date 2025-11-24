@@ -12,7 +12,7 @@
     InvokeBuild task.
 
     .EXAMPLE
-    $testParams = _GetDotNetTestParamsForVsTest
+    $testParams = _GetDotNetTestParamsForMtp
 #>
 function _GetDotNetTestParamsForMtp {
     [CmdletBinding()]
@@ -22,7 +22,7 @@ function _GetDotNetTestParamsForMtp {
         "--solution", $SolutionToBuild
     )
 
-    $DotNetTestLoggers | ForEach-Object {
+    $_resolvedLoggers | ForEach-Object {
         if ($_ -match "^trx") {
             $dotnetTestArgs += "--report-trx"
             # Parse TRX logger parameters
