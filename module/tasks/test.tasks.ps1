@@ -83,9 +83,10 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
                     Write-Warning "The following TRX logger parameters are not supported and will be ignored when using Microsoft Testing Platform: $($unhandledTrxParams -join ', ')"
                 }
             }
-            elseif ($_ -eq "AzurePipelines") {
-                $dotnetTestArgs += "--report-azdo"
-            }
+            # NOTE:
+            #   Consider other report extensions we should support here and whether we can retain the
+            #   ability to use them at runtime, without requiring test projects to explicitly reference
+            #   them (as we are able to do when using the VSTest platform by simply bundling a DLL)
         }
     }
     else {
