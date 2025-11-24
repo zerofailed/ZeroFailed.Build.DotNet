@@ -6,8 +6,30 @@
 
 # Synopsis: Run .NET solution tests with 'dotnet-coverage' to collect code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
-    # Setup the appropriate CI/CD platform test logger, unless explicitly disabled
-    if (!$DisableCicdServerLogger) {
+
+    # Detect Microsoft Testing Platform (MTP) usage
+    $isMtp = $false
+    try {
+        # Rather than re-implement all the detection logic ourselves with respect to
+        # locating a valid global.json etc., we simply rely on 'dotnet test' to do 
+        # this for us.  When detecting a solution or project using the old testing
+        # platform it outputs a different message to reflect how it will interpret
+        # any command-line parameters passed to it.
+        $helpOutput = & dotnet test $SolutionToBuild --help 2>&1 | Out-String
+        if ($helpOutput -match "\.NET Test Command for Microsoft\.Testing\.Platform") {
+            $isMtp = $true
+            Write-Build Cyan "Microsoft Testing Platform detected."
+        }
+    }
+    catch {
+        Write-Build Yellow "Failed to detect testing platform via help command: $($_.Exception.Message)`nAssuming VSTest."
+    }
+
+    # Deferred evaluation of logger defaults, since these depend on which test platform is being used
+    $_resolvedLoggers = Resolve-Value $DotNetTestLoggers
+
+    # Setup the appropriate CI/CD platform test logger, unless explicitly disabled (or using MTP)
+    if (!$isMtp -and !$DisableCicdServerLogger) {
         if ($script:IsAzureDevOps) {
             Write-Build Green "Configuring Azure Pipelines test logger"
             $script:DotNetTestLoggers += "AzurePipelines"
@@ -27,72 +49,18 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     $moduleDir = Split-Path -Parent (Split-Path -Parent $Task.InvocationInfo.ScriptName)
     Write-Verbose "ModuleDir: $moduleDir"
 
-    # Detect Microsoft Testing Platform (MTP) usage
-    $isMtp = $false
-    try {
-        # Rather than re-implement all the detection logic ourselves with respect to
-        # locating a valid global.json etc., we simply rely on 'dotnet test' to do 
-        # this for us.  When detecting a solution or project using the old testing
-        # platform it outputs a different message to reflect how it will interpret
-        # any command-line parameters passed to it.
-        $helpOutput = & dotnet test $SolutionToBuild --help 2>&1 | Out-String
-        if ($helpOutput -match "\.NET Test Command for Microsoft\.Testing\.Platform") {
-            $isMtp = $true
-            Write-Build Cyan "Microsoft Testing Platform detected."
-        }
-    }
-    catch {
-        Write-Verbose "Failed to detect testing platform via help command. Assuming VSTest."
-    }
-
     # Setup the arguments we need to pass to 'dotnet test'
     $dotnetTestArgs = @(
         "--configuration", $Configuration
         "--no-build"
         "--no-restore"
-        "--verbosity", $LogLevel
     )
 
-    if (-not $isMtp) {
-        $dotnetTestArgs += "--test-adapter-path", (Join-Path $moduleDir "bin")
-        $dotnetTestArgs += ($_fileLoggerProps ? $_fileLoggerProps : "/fl")
-    }
-
-    # Configure any test loggers that have been specified
     if ($isMtp) {
-        $DotNetTestLoggers | ForEach-Object {
-            if ($_ -match "^trx") {
-                $dotnetTestArgs += "--report-trx"
-                # Parse TRX logger parameters
-                $trxParams = @{}
-                if ($_ -match "^trx;(.*)$") {
-                    $paramString = $matches[1]
-                    $paramString -split ';' | ForEach-Object {
-                        if ($_ -match "^([^=]+)=(.*)$") {
-                            $key = $matches[1]
-                            $value = $matches[2]
-                            $trxParams[$key] = $value
-                        }
-                    }
-                }
-                if ($trxParams.ContainsKey("LogFilePrefix")) {
-                    $dotnetTestArgs += "--report-trx-filename", "$($trxParams["LogFilePrefix"]).trx"
-                }
-                $unhandledTrxParams = $trxParams.Keys | Where-Object { $_ -ne "LogFilePrefix" }
-                if ($unhandledTrxParams.Count -gt 0) {
-                    Write-Warning "The following TRX logger parameters are not supported and will be ignored when using Microsoft Testing Platform: $($unhandledTrxParams -join ', ')"
-                }
-            }
-            # NOTE:
-            #   Consider other report extensions we should support here and whether we can retain the
-            #   ability to use them at runtime, without requiring test projects to explicitly reference
-            #   them (as we are able to do when using the VSTest platform by simply bundling a DLL)
-        }
+        $dotnetTestArgs += _getDotNetTestParamsForMtp
     }
     else {
-        $DotNetTestLoggers | ForEach-Object {
-            $dotnetTestArgs += @("--logger", $_)
-        }
+        $dotnetTestArgs += _getDotNetTestParamsForVsTest
     }
 
     $coverageOutput = "coverage{0}.cobertura.xml" -f ($TargetFrameworkMoniker ? ".$TargetFrameworkMoniker" : "")
@@ -119,18 +87,10 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         "test"
     )
 
-    # Prepare target arguments
-    $targetArgs = @()
-    if ($isMtp) {
-        $targetArgs += "--solution", $SolutionToBuild
-    } else {
-        $targetArgs += $SolutionToBuild
-    }
-
-    Write-Verbose "CmdLine: $dotnetCoverageArgs $targetArgs $dotnetTestArgs" -Verbose
+    Write-Verbose "CmdLine: $dotnetCoverageArgs $dotnetTestArgs" -Verbose
     try {
         exec { 
-            & dotnet-coverage @dotnetCoverageArgs @targetArgs @dotnetTestArgs
+            & dotnet-coverage @dotnetCoverageArgs @dotnetTestArgs
         }
 
         # Only generate code coverage reports if the tests passed
