@@ -1,4 +1,23 @@
-function _getDotNetTestParamsForMtp {
+# <copyright file="_GetDotNetTestParamsForMtp.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
+
+<# 
+    .SYNOPSIS
+    Generates the command-line arguments required for using 'dotnet test' with the Microsoft Testing Platform.
+
+    .DESCRIPTION
+    Generates the command-line arguments required for using 'dotnet test' with the Microsoft Testing Platform.
+    Directly consumes script-scoped variables expected to be available via the 'RunTestsWithDotNetCoverage'
+    InvokeBuild task.
+
+    .EXAMPLE
+    $testParams = _GetDotNetTestParamsForVsTest
+#>
+function _GetDotNetTestParamsForMtp {
+    [CmdletBinding()]
+    param ()
+
     $dotnetTestArgs = @(
         "--solution", $SolutionToBuild
     )

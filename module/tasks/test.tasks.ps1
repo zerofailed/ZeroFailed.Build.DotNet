@@ -57,10 +57,10 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     )
 
     if ($isMtp) {
-        $dotnetTestArgs += _getDotNetTestParamsForMtp
+        $dotnetTestArgs += _GetDotNetTestParamsForMtp
     }
     else {
-        $dotnetTestArgs += _getDotNetTestParamsForVsTest
+        $dotnetTestArgs += _GetDotNetTestParamsForVsTest
     }
 
     $coverageOutput = "coverage{0}.cobertura.xml" -f ($TargetFrameworkMoniker ? ".$TargetFrameworkMoniker" : "")
