@@ -121,11 +121,7 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     # Prepare target arguments
     $targetArgs = @()
     if ($isMtp) {
-        if ($SolutionToBuild -match "\.slnx?$") {
-            $targetArgs += "--solution", $SolutionToBuild
-        } else {
-            $targetArgs += "--project", $SolutionToBuild
-        }
+        $targetArgs += "--solution", $SolutionToBuild
     } else {
         $targetArgs += $SolutionToBuild
     }
