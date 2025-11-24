@@ -3,7 +3,7 @@
 # </copyright>
 
 # Synopsis: The version of the Covenant .NET global tool to install
-$covenantVersion = "0.21.0"
+$covenantVersion = "0.24.0"
 
 # Synopsis: When true, an SPDX-formatted SBOM will be generated from the Covenant report 
 $CovenantIncludeSpdxReport = $true
