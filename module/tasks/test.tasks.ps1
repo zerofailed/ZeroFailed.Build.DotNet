@@ -30,6 +30,11 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     # Detect Microsoft Testing Platform (MTP) usage
     $isMtp = $false
     try {
+        # Rather than re-implement all the detection logic ourselves with respect to
+        # locating a valid global.json etc., we simply rely on 'dotnet test' to do 
+        # this for us.  When detecting a solution or project using the old testing
+        # platform it outputs a different message to reflect how it will interpret
+        # any command-line parameters passed to it.
         $helpOutput = & dotnet test $SolutionToBuild --help 2>&1 | Out-String
         if ($helpOutput -match "\.NET Test Command for Microsoft\.Testing\.Platform") {
             $isMtp = $true
