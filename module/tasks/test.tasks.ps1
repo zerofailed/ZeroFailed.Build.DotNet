@@ -63,8 +63,24 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         $DotNetTestLoggers | ForEach-Object {
             if ($_ -match "^trx") {
                 $dotnetTestArgs += "--report-trx"
-                if ($_ -match "LogFilePrefix=([^;]+)") {
-                     $dotnetTestArgs += "--report-trx-filename", "$($matches[1]).trx"
+                # Parse TRX logger parameters
+                $trxParams = @{}
+                if ($_ -match "^trx;(.*)$") {
+                    $paramString = $matches[1]
+                    $paramString -split ';' | ForEach-Object {
+                        if ($_ -match "^([^=]+)=(.*)$") {
+                            $key = $matches[1]
+                            $value = $matches[2]
+                            $trxParams[$key] = $value
+                        }
+                    }
+                }
+                if ($trxParams.ContainsKey("LogFilePrefix")) {
+                    $dotnetTestArgs += "--report-trx-filename", "$($trxParams["LogFilePrefix"]).trx"
+                }
+                $unhandledTrxParams = $trxParams.Keys | Where-Object { $_ -ne "LogFilePrefix" }
+                if ($unhandledTrxParams.Count -gt 0) {
+                    Write-Warning "The following TRX logger parameters are not supported and will be ignored when using Microsoft Testing Platform: $($unhandledTrxParams -join ', ')"
                 }
             }
             elseif ($_ -eq "AzurePipelines") {
