@@ -18,7 +18,10 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         $helpOutput = & dotnet test $SolutionToBuild --help 2>&1 | Out-String
         if ($helpOutput -match "\.NET Test Command for Microsoft\.Testing\.Platform") {
             $isMtp = $true
-            Write-Build Cyan "Microsoft Testing Platform detected."
+            Write-Build White "Microsoft Testing Platform detected."
+        }
+        else {
+            Write-Build White "VSTest detected."
         }
     }
     catch {
