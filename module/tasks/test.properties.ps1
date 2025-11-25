@@ -34,11 +34,13 @@ $ReportGeneratorToolVersion = "5.3.8"
 # Synopsis: Allows the type of reports produced by the 'dotnet-reportgenerator-globaltool' to be customised. Defaults to "HtmlInline".
 $TestReportTypes ??= "HtmlInline"
 
-# Synopsis: Sets the default '--logger' configuration passed to 'dotnet test'.
-$DotNetTestLoggers = @(
-    "console;verbosity=$LogLevel"
-    "trx;LogFilePrefix=test-results"
-)
+# Synopsis: Sets the default 'logger' configuration passed to 'dotnet test'.
+$DotNetTestLoggers = {
+    @(
+        "console;verbosity=$LogLevel"
+        "trx;LogFilePrefix=test-results"
+    )
+}
 
 # Synopsis: When true, the CI/CD-specific loggers will not be used (e.g. Azure DevOps, GitHub Actions)
 $DisableCicdServerLogger = $false
@@ -46,5 +48,34 @@ $DisableCicdServerLogger = $false
 # Synopsis: The path to the MSBuild log file produced when running tests via 'dotnet test'. Defaults to "dotnet-test.log".
 $DotNetTestLogFile = "dotnet-test.log"
 
+$DotNetTestFileLoggerProps_VSTest = "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetTestLogFile"
+$DotNetTestFileLoggerProps_MTP = {
+    @(
+        '--diagnostic'
+        '--diagnostic-verbosity'
+        $(switch ($DotNetFileLoggerVerbosity) {
+            'quiet' { 'Critical' }
+            'minimal' { 'Error' }
+            'normal' { 'Warning' }
+            'detailed' { 'Information' }
+            'diagnostic' { 'Trace' }
+            default {
+                Write-Host -f Yellow "Unexpected DotNetFileLoggerVerbosity value '$DotNetFileLoggerVerbosity'. Defaulting to 'Warning'."
+                'Warning'
+            }
+        })
+        '--diagnostic-output-fileprefix'
+        'dotnet-test'
+        '--diagnostic-output-directory'
+        $here
+    )
+}
 # Synopsis: Allow the file logger properties used when running tests via 'dotnet test' to be customised. Defaults to "/flp:verbosity=<DotNetFileLoggerVerbosity>;logfile=<DotNetTestLogFile>". Supports lazy evaluation.
-$DotNetTestFileLoggerProps = "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetTestLogFile"
+$DotNetTestFileLoggerProps = {
+    if ($isMtp) {
+        Resolve-Value $DotNetTestFileLoggerProps_MTP
+    }
+    else {
+        Resolve-Value $DotNetTestFileLoggerProps_VSTest
+    }
+}
