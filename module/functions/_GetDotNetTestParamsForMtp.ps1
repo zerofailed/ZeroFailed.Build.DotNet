@@ -45,6 +45,9 @@ function _GetDotNetTestParamsForMtp {
                 Write-Warning "The following TRX logger parameters are not supported and will be ignored when using Microsoft Testing Platform: $($unhandledTrxParams -join ', ')"
             }
         }
+        else {
+            Write-Host -f Yellow "Skipping unknown MTP logger '$_'"
+        }
         # NOTE:
         #   Consider other report extensions we should support here and whether we can retain the
         #   ability to use them at runtime, without requiring test projects to explicitly reference
