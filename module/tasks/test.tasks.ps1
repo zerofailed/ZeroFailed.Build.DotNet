@@ -57,6 +57,7 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         "--configuration", $Configuration
         "--no-build"
         "--no-restore"
+        "--verbosity", $LogLevel
     )
 
     if ($isMtp) {

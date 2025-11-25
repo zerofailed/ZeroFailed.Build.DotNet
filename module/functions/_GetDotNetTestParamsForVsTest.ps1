@@ -20,7 +20,6 @@ function _GetDotNetTestParamsForVsTest {
 
     $dotnetTestArgs = @(
         $SolutionToBuild
-        "--verbosity", $LogLevel
     )
 
     $_resolvedLoggers | ForEach-Object {
