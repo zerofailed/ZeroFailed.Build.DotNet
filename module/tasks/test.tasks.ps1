@@ -46,12 +46,6 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     # Evaluate the file logger properties so we can pass them to 'dotnet test'
     $_fileLoggerProps = Resolve-Value $DotNetTestFileLoggerProps
 
-    # Use InvokeBuild's built-in $Task variable to know where this file is installed and use it to 
-    # derive where the root of the module must be.  This method will work when this module has
-    # been directly imported as well as when it is used as a ZeroFailed extension.
-    $moduleDir = Split-Path -Parent (Split-Path -Parent $Task.InvocationInfo.ScriptName)
-    Write-Verbose "ModuleDir: $moduleDir"
-
     # Setup the arguments we need to pass to 'dotnet test'
     $dotnetTestArgs = @(
         "--configuration", $Configuration

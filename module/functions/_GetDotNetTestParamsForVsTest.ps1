@@ -19,15 +19,22 @@ function _GetDotNetTestParamsForVsTest {
     param ()
 
     $dotnetTestArgs = @(
-        $SolutionToBuild
+        $script:SolutionToBuild
     )
 
-    $_resolvedLoggers | ForEach-Object {
-        $dotnetTestArgs += @("--logger", $_)
-    }
+    $script:_resolvedLoggers |
+        Where-Object { $_ } |
+        ForEach-Object { 
+            $dotnetTestArgs += @("--logger", $_)
+        }
 
-    $dotnetTestArgs += "--test-adapter-path", (Join-Path $moduleDir "bin")
-    $dotnetTestArgs += ($_fileLoggerProps ? $_fileLoggerProps : "/fl")
+    # Derive the path to the bundled logger assemblies
+    $moduleDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $binDir = Join-Path $moduleDir "bin"
+    Write-Verbose "LoggersBinDir: $binDir"
+
+    $dotnetTestArgs += "--test-adapter-path", $binDir
+    $dotnetTestArgs += ($script:_fileLoggerProps ? $script:_fileLoggerProps : "/fl")
 
     return $dotnetTestArgs
 }

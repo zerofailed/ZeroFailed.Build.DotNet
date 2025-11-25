@@ -59,6 +59,10 @@ $DotNetTestFileLoggerProps_MTP = {
             'normal' { 'Warning' }
             'detailed' { 'Information' }
             'diagnostic' { 'Trace' }
+            default {
+                Write-Host -f Yellow "Unexpected DotNetFileLoggerVerbosity value '$DotNetFileLoggerVerbosity'. Defaulting to 'Warning'."
+                'Warning'
+            }
         })
         '--diagnostic-output-fileprefix'
         'dotnet-test'
