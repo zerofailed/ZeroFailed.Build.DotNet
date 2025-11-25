@@ -12,7 +12,7 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     try {
         # Rather than re-implement all the detection logic ourselves with respect to
         # locating a valid global.json etc., we simply rely on 'dotnet test' to do 
-        # this for us.  When detecting a solution or project using the old testing
+        # this for us.  When detecting a solution or project using the VSTest
         # platform it outputs a different message to reflect how it will interpret
         # any command-line parameters passed to it.
         $helpOutput = & dotnet test $SolutionToBuild --help 2>&1 | Out-String
