@@ -54,7 +54,9 @@ function _GetDotNetTestParamsForMtp {
         #   them (as we are able to do when using the VSTest platform by simply bundling a DLL)
     }
 
-    $dotnetTestArgs += $_fileLoggerProps
+    if ($null -ne $_fileLoggerProps -and $_fileLoggerProps) {
+        $dotnetTestArgs += $_fileLoggerProps
+    }
 
     return $dotnetTestArgs
 }
