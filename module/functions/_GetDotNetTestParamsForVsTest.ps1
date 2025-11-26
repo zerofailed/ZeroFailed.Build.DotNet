@@ -22,7 +22,7 @@ function _GetDotNetTestParamsForVsTest {
         $script:SolutionToBuild
     )
 
-    $script:_resolvedLoggers |
+    $script:DotNetTestLoggers |
         Where-Object { $_ } |
         ForEach-Object { 
             $dotnetTestArgs += @("--logger", $_)

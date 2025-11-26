@@ -28,9 +28,6 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         Write-Build Yellow "Failed to detect testing platform via help command: $($_.Exception.Message)`nAssuming VSTest."
     }
 
-    # Deferred evaluation of logger defaults, since these depend on which test platform is being used
-    $_resolvedLoggers = Resolve-Value $DotNetTestLoggers
-
     # Setup the appropriate CI/CD platform test logger, unless explicitly disabled (or using MTP)
     if (!$isMtp -and !$DisableCicdServerLogger) {
         if ($script:IsAzureDevOps) {
