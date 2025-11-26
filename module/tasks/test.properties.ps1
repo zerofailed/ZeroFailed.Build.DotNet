@@ -35,12 +35,10 @@ $ReportGeneratorToolVersion = "5.3.8"
 $TestReportTypes ??= "HtmlInline"
 
 # Synopsis: Sets the default 'logger' configuration passed to 'dotnet test'.
-$DotNetTestLoggers = {
-    @(
-        "console;verbosity=$LogLevel"
-        "trx;LogFilePrefix=test-results"
-    )
-}
+$DotNetTestLoggers = @(
+    "console;verbosity=$LogLevel"
+    "trx;LogFilePrefix=test-results"
+)
 
 # Synopsis: When true, the CI/CD-specific loggers will not be used (e.g. Azure DevOps, GitHub Actions)
 $DisableCicdServerLogger = $false

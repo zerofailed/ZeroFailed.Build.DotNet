@@ -22,16 +22,16 @@ function _GetDotNetTestParamsForVsTest {
         $script:SolutionToBuild
     )
 
-    $script:_resolvedLoggers |
+    $script:DotNetTestLoggers |
         Where-Object { $_ } |
-        ForEach-Object { 
+        ForEach-Object {
             $dotnetTestArgs += @("--logger", $_)
         }
 
     # Derive the path to the bundled logger assemblies
-    $moduleDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $moduleDir = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
     $binDir = Join-Path $moduleDir "bin"
-    Write-Verbose "LoggersBinDir: $binDir"
+    Write-Verbose "LoggersBinDir: $binDir" -Verbose
 
     $dotnetTestArgs += "--test-adapter-path", $binDir
     $dotnetTestArgs += ($script:_fileLoggerProps ? $script:_fileLoggerProps : "/fl")

@@ -22,7 +22,7 @@ function _GetDotNetTestParamsForMtp {
         "--solution", $script:SolutionToBuild
     )
 
-    $script:_resolvedLoggers |
+    $script:DotNetTestLoggers |
         Where-Object { $_ } |
         ForEach-Object {
             if ($_ -match "^trx") {
