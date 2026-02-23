@@ -53,7 +53,7 @@ task BuildProjectPublishPackages -If {!$SkipProjectPublishPackages -and $Project
     Get-Item $DotNetPublishLogFile -ErrorAction Ignore | Remove-Item -Force
 
     # Check each entry to see whether it is using the older or newer configuration style
-    $projectPublishingTasks = $ProjectsToPublish | % {
+    $projectPublishingTasks = $ProjectsToPublish | ForEach-Object {
         if ($_ -is [Hashtable]) {
             # New style config: just use whatever has been specified
             $_
@@ -78,8 +78,10 @@ task BuildProjectPublishPackages -If {!$SkipProjectPublishPackages -and $Project
                 if ($task.ContainsKey("SingleFile") -and $task.SingleFile -eq $true) { $optionalCmdArgs += "-p:PublishSingleFile=true" }
 
                 if ($runtime -eq "NOT_SPECIFIED") {
-                    # If no runtime is specified then we can skip the build
-                    $optionalCmdArgs += "--no-build"
+                    # If no runtime is specified then we can skip the build & package restore, as the outputs from the
+                    # build phase will be valid. This is not necessarily the case when using the options that target
+                    # a particular OS, since the deployment OS could be different to that running the build.
+                    $optionalCmdArgs += "--no-build","--no-restore"
                 }
                 else {
                     # Specify the required runtime
@@ -95,7 +97,6 @@ task BuildProjectPublishPackages -If {!$SkipProjectPublishPackages -and $Project
                     dotnet publish $task.Project `
                                 --nologo `
                                 --configuration $Configuration `
-                                --no-restore `
                                 /p:PublishDir="$packageOutputDir" `
                                 /p:EndjinRepositoryUrl="$BuildRepositoryUri" `
                                 /p:PackageVersion="$(($script:GitVersion).SemVer)" `
