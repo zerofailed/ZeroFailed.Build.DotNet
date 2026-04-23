@@ -129,7 +129,7 @@ task StripOutputFromLargeTrxFiles -If {$StripOutputFromLargeTrxFiles} {
 }
 
 # Synopsis: Handles the scenario where the generated code coverage markdown file would be too big for a GitHub PR comment
-task TruncateOversizedCoverageReport -If {$TruncateOversizedCoverageReport} {
+task TruncateOversizedCoverageReport -If {$TruncateOversizedCoverageReport -and $GenerateMarkdownCodeCoverageSummary} {
     # GitHub PR comments have a 65536 character limit. The coverage summary for this
     # solution often exceeds that. Truncate and append a note when too large.
     # The SummaryGithub.md is generated inside RunTestsWithDotNetCoverage (before
@@ -156,4 +156,4 @@ task TestReport -If {!$SkipTestReport} `
     -Jobs GenerateTestReport,
             GenerateMarkdownCodeCoverageSummary,
             StripOutputFromLargeTrxFiles,
-            GenerateMarkdownCodeCoverageSummary
+            TruncateOversizedCoverageReport
