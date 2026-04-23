@@ -11,7 +11,7 @@ $_uploadTestLog = {
         Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
     }
 }
-$script:OnExitActions.Add($_uploadTestLog)
+Register-OnExitAction -Action $_uploadTestLog
 
 # Synopsis: Run .NET solution tests with 'dotnet-coverage' to collect code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
