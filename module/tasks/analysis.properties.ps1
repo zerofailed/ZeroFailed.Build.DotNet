@@ -3,16 +3,16 @@
 # </copyright>
 
 # Synopsis: The version of the Covenant .NET global tool to install
-$covenantVersion = "0.24.0"
+$covenantVersion ??= "0.24.0"
 
 # Synopsis: When true, an SPDX-formatted SBOM will be generated from the Covenant report 
-$CovenantIncludeSpdxReport = $true
+$CovenantIncludeSpdxReport ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_COVENANT_INCLUDE_SPDX_REPORT $false))
 
 # Synopsis: When true, an CycloneDx-formatted SBOM will be generated from the Covenant report
-$CovenantIncludeCycloneDxReport = $false
+$CovenantIncludeCycloneDxReport ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_COVENANT_INCLUDE_CYCLONEDX_REPORT $false))
 
 # Synopsis: A hashtable of additional metadata to be included in the Covenant report
-$CovenantMetadata = @{
+$CovenantMetadata ??= @{
     git_repo = $(if (Get-Command "gh" -CommandType Application -ErrorAction Ignore) {
         try {
             $ghRepo = & gh repo view --json nameWithOwner

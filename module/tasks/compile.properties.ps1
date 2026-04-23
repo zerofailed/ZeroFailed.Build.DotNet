@@ -3,13 +3,13 @@
 # </copyright>
 
 # Synopsis: When true, the .NET build functionality will be skipped.
-$SkipBuildSolution = $false
+$SkipBuildSolution ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_SKIP_BUILD_SOLUTION $false))
 
 # Synopsis: The path to the Visual Studio solution file to build.
-$SolutionToBuild = $null
+$SolutionToBuild ??= $null
 
 # Synopsis: An array of project folders to be removed when cleaning the solution. Defaults to "bin", "obj", "TestResults", "_codeCoverage", "_packages".
-$FoldersToClean = @("bin", "obj", "TestResults", "_codeCoverage", "_packages")
+$FoldersToClean ??= @("bin", "obj", "TestResults", "_codeCoverage", "_packages")
 
 # Logging properties
 
@@ -17,14 +17,14 @@ $FoldersToClean = @("bin", "obj", "TestResults", "_codeCoverage", "_packages")
 $LogLevel ??= "minimal"
 
 # Synopsis: Sets ths MSBuild file logging verbosity level. Valid values are "quiet", "minimal", "normal", "detailed", and "diagnostic". Defaults to "normal".
-$DotNetFileLoggerVerbosity ??= "normal"
+$DotNetFileLoggerVerbosity ??= property ZF_BUILD_DOTNET_FILE_LOGGER_VERBOSITY "normal"
 
 # Synopsis: The path to the MSBuild log file produced by 'dotnet build'. Defaults to "dotnet-build.log".
-$DotNetCompileLogFile = "dotnet-build.log"
+$DotNetCompileLogFile ??= "dotnet-build.log"
 
 # TODO: Support a dedicated log directory
 # Synopsis: Allow the file logger properties used by 'dotnet build' to be customised. Defaults to "/flp:verbosity=<DotNetFileLoggerVerbosity>;logfile=<DotNetCompileLogFile>". Supports lazy evaluation.
-$DotNetCompileFileLoggerProps = { "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetCompileLogFile" }
+$DotNetCompileFileLoggerProps ??= { "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetCompileLogFile" }
 
 # TODO - Optional properties
 # /p:EndjinRepositoryUrl="$BuildRepositoryUri" `

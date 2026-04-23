@@ -5,34 +5,34 @@
 # Testing Options
 
 # Synopsis: When true, the .NET test functionality will be skipped.
-$SkipDotNetTests = $false
+$SkipDotNetTests ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_SKIP_TESTS $false))
 
 # Synopsis: Allows arbitrary arguments to be passed to 'dotnet test'.
-$AdditionalTestArgs = @()
+$AdditionalTestArgs ??= @()
 
 # Synopsis: Optionally specify the target framework moniker to use when running tests.
-$TargetFrameworkMoniker = ""
+$TargetFrameworkMoniker ??= ""
 
 # Synopsis: An optional wildcard expression filter for assemblies that should be included in the code coverage report. Defaults to no filter.
-$IncludeAssembliesInCodeCoverage = ""
+$IncludeAssembliesInCodeCoverage ??= ""
 
 # Synopsis: An optional wildcard expression filter for assemblies that should be excluded from the code coverage report. Defaults to no filter.
-$ExcludeAssembliesInCodeCoverage = ""
+$ExcludeAssembliesInCodeCoverage ??= ""
 
 # Synopsis: Sets the default 'logger' configuration passed to 'dotnet test'.
-$DotNetTestLoggers = @(
+$DotNetTestLoggers ??= @(
     "console;verbosity=$LogLevel"
     "trx;LogFilePrefix=test-results"
 )
 
 # Synopsis: When true, the CI/CD-specific loggers will not be used (e.g. Azure DevOps, GitHub Actions)
-$DisableCicdServerLogger = $false
+$DisableCicdServerLogger ??= $false
 
 # Synopsis: The path to the MSBuild log file produced when running tests via 'dotnet test'. Defaults to "dotnet-test.log".
-$DotNetTestLogFile = "dotnet-test.log"
+$DotNetTestLogFile ??= "dotnet-test.log"
 
-$DotNetTestFileLoggerProps_VSTest = "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetTestLogFile"
-$DotNetTestFileLoggerProps_MTP = {
+$DotNetTestFileLoggerProps_VSTest ??= "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetTestLogFile"
+$DotNetTestFileLoggerProps_MTP ??= {
     @(
         '--diagnostic'
         '--diagnostic-verbosity'
@@ -54,7 +54,7 @@ $DotNetTestFileLoggerProps_MTP = {
     )
 }
 # Synopsis: Allow the file logger properties used when running tests via 'dotnet test' to be customised. Defaults to "/flp:verbosity=<DotNetFileLoggerVerbosity>;logfile=<DotNetTestLogFile>". Supports lazy evaluation.
-$DotNetTestFileLoggerProps = {
+$DotNetTestFileLoggerProps ??= {
     if ($isMtp) {
         Resolve-Value $DotNetTestFileLoggerProps_MTP
     }
