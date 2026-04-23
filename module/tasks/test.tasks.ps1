@@ -8,6 +8,7 @@
 # uploaded to Azure DevOps even if the process has encountered a terminating error.
 $_uploadTestLog = {
     if ((Test-Path $DotNetTestLogFile) -and $IsAzureDevOps) {
+        Write-Build White "Publishing test log file as Azure Pipeline artifact"
         Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
     }
 }
