@@ -63,28 +63,67 @@ task StripOutputFromLargeTrxFiles -If {$StripOutputFromLargeTrxFiles} {
         ForEach-Object {
             $file = $_
             $sizeMB = [math]::Round($_.Length / 1MB, 1)
+            if ($sizeMB -lt 5) {
+                Write-Verbose "StripOutputFromLargeTrxFiles: $($file.Name) ($sizeMB MB) — small, skipping"
+                return
+            }
             Write-Build White "StripOutputFromLargeTrxFiles: processing $($file.FullName) ($sizeMB MB)"
             try {
-                $content = [System.IO.File]::ReadAllText($file.FullName)
-                # Strip all <Output> blocks — covers StdOut, ErrorInfo, StackTrace.
-                # The publish action only needs pass/fail/skip status, not output text.
-                $stripped = [regex]::Replace(
-                    $content,
-                    '<Output>.*?</Output>',
-                    '',
-                    [System.Text.RegularExpressions.RegexOptions]::Singleline)
-                if ($stripped.Length -ne $content.Length) {
-                    [System.IO.File]::WriteAllText($file.FullName, $stripped)
+                $tempPath = "$($file.FullName).stripped"
+                $inOutput = $false
+                $linesStripped = 0
+                $reader = [System.IO.StreamReader]::new($file.FullName)
+                $writer = [System.IO.StreamWriter]::new($tempPath)
+                try {
+                    while ($null -ne ($line = $reader.ReadLine())) {
+                        # Handle single-line <Output>...</Output>
+                        if (-not $inOutput -and $line -match '<Output>' -and $line -match '</Output>') {
+                            # Strip the Output block but keep surrounding content on the same line
+                            $stripped = $line -replace '<Output>.*?</Output>', ''
+                            if ($stripped.Trim()) {
+                                $writer.WriteLine($stripped)
+                            }
+                            $linesStripped++
+                            continue
+                        }
+                        # Multi-line: entering <Output> block
+                        if (-not $inOutput -and $line -match '<Output>') {
+                            $inOutput = $true
+                            $linesStripped++
+                            continue
+                        }
+                        # Multi-line: exiting </Output> block
+                        if ($inOutput -and $line -match '</Output>') {
+                            $inOutput = $false
+                            $linesStripped++
+                            continue
+                        }
+                        # Inside multi-line Output block: skip
+                        if ($inOutput) {
+                            $linesStripped++
+                            continue
+                        }
+                        $writer.WriteLine($line)
+                    }
+                }
+                finally {
+                    $reader.Close()
+                    $writer.Close()
+                }
+
+                if ($linesStripped -gt 0) {
+                    Move-Item -Path $tempPath -Destination $file.FullName -Force
                     $newSizeMB = [math]::Round((Get-Item $file.FullName).Length / 1MB, 1)
                     Write-Build White "  Stripped output: $sizeMB MB -> $newSizeMB MB"
                 }
-                # Validate the TRX file is well-formed XML
-                [xml]([System.IO.File]::ReadAllText($file.FullName)) | Out-Null
-                Write-Verbose "  XML valid"
+                else {
+                    Remove-Item $tempPath -Force -ErrorAction SilentlyContinue
+                    Write-Build White "  No Output blocks found"
+                }
             }
             catch {
-                Write-Build Yellow "  TRX file is invalid or unprocessable, removing: $file"
-                Remove-Item $file.FullName -Force -ErrorAction SilentlyContinue
+                Write-Build Yellow "  Error processing TRX: $file"
+                Remove-Item "$($file.FullName).stripped" -Force -ErrorAction SilentlyContinue
             }
         }
 }
