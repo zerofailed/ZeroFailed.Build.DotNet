@@ -4,6 +4,16 @@
 
 . $PSScriptRoot/test.properties.ps1
 
+# Use the 'OnExitActions' convention provided by the ZF process to ensure that the test log is
+# uploaded to Azure DevOps even if the process has encountered a terminating error.
+$_uploadTestLog = {
+    if ((Test-Path $DotNetTestLogFile) -and $IsAzureDevOps) {
+        Write-Build White "Publishing test log file as Azure Pipeline artifact"
+        Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
+    }
+}
+Register-OnExitAction -Action $_uploadTestLog
+
 # Synopsis: Run .NET solution tests with 'dotnet-coverage' to collect code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
 
@@ -83,36 +93,8 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     )
 
     Write-Verbose "CmdLine: $dotnetCoverageArgs $dotnetTestArgs" -Verbose
-    try {
-        exec { 
-            & dotnet-coverage @dotnetCoverageArgs @dotnetTestArgs
-        }
-
-        # Only generate code coverage reports if the tests passed
-        if (!$SkipTestReport -and (Test-Path $coverageOutput)) {
-            if ($GenerateTestReport) {
-                Write-Build White "Generating additional test reports: $TestReportTypes"
-                _GenerateTestReport `
-                    -ReportTypes $TestReportTypes `
-                    -OutputPath $CoverageDir `
-                    -IncludeAssemblyFilter $IncludeAssembliesInCodeCoverage `
-                    -ExcludeAssemblyFilter $ExcludeAssembliesInCodeCoverage
-            }
-            if ($GenerateMarkdownCodeCoverageSummary) {
-                Write-Build White "Generating Markdown code coverage summary"
-                _GenerateCodeCoverageMarkdownReport `
-                    -UseGitHubFlavour $IsGitHubActions `
-                    -TargetFrameworkMoniker $TargetFrameworkMoniker `
-                    -OutputPath $CoverageDir `
-                    -IncludeAssemblyFilter $IncludeAssembliesInCodeCoverage `
-                    -ExcludeAssemblyFilter $ExcludeAssembliesInCodeCoverage
-            }
-        }
-    }
-    finally {
-        if ((Test-Path $DotNetTestLogFile) -and $IsAzureDevOps) {
-            Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
-        }
+    exec { 
+        & dotnet-coverage @dotnetCoverageArgs @dotnetTestArgs
     }
 }
 
