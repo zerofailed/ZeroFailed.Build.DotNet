@@ -13,12 +13,6 @@ $AdditionalTestArgs ??= @()
 # Synopsis: Optionally specify the target framework moniker to use when running tests.
 $TargetFrameworkMoniker ??= ""
 
-# Synopsis: An optional wildcard expression filter for assemblies that should be included in the code coverage report. Defaults to no filter.
-$IncludeAssembliesInCodeCoverage ??= ""
-
-# Synopsis: An optional wildcard expression filter for assemblies that should be excluded from the code coverage report. Defaults to no filter.
-$ExcludeAssembliesInCodeCoverage ??= ""
-
 # Synopsis: Sets the default 'logger' configuration passed to 'dotnet test'.
 $DotNetTestLoggers ??= @(
     "console;verbosity=$LogLevel"

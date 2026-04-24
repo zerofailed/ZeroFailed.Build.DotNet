@@ -13,31 +13,46 @@ $_generateTestReports = {
 }
 Register-OnExitAction -Action $_generateTestReports
 
+# Synopsis: Configures the core set of reportgenerator command-line arguments
+task PrepareTestReportParameters {
+    # Handle the legacy format for the assembly filter properties, where they were passed
+    # as a single string, with the user having to handle the formatting when specifying
+    # multiple filters (e.g. 'MyAssembly*;+MyOtherAssembly')
+    if ($IncludeAssembliesInCodeCoverage -imatch ';') {
+        $IncludeAssembliesInCodeCoverage = $IncludeAssembliesInCodeCoverage -split ';' | ForEach-Object { $_.TrimStart('+') }
+        Write-Build Yellow "Migrated legacy IncludeAssembliesInCodeCoverage: $IncludeAssembliesInCodeCoverage"
+    }
+    if ($ExcludeAssembliesInCodeCoverage -imatch ';') {
+        $ExcludeAssembliesInCodeCoverage = $ExcludeAssembliesInCodeCoverage -split ';' | ForEach-Object { $_.TrimStart('-') }
+        Write-Build Yellow "Migrated legacy ExcludeAssembliesInCodeCoverage: $ExcludeAssembliesInCodeCoverage"
+    }
+
+    $script:ReportGeneratorSplat = @{
+        BasePath = $SourcesDir
+        OutputPath = $CoverageDir
+        IncludeAssemblyFilters = $IncludeAssembliesInCodeCoverage
+        ExcludeAssemblyFilters = $ExcludeAssembliesInCodeCoverage
+        IncludeFileFilters = $IncludeFilesInCodeCoverage
+        ExcludeFileFilters = $ExcludeFilesInCodeCoverage
+        AdditionalArgs = $ReportGeneratorAdditionalArgs
+    }
+}
+
 # Synopsis: Generates additional test reports using 'dotnet-reportgenerator-globaltool'.
-task GenerateTestReport -If {$GenerateTestReport} {
-        
+task GenerateTestReport -If {$GenerateTestReport} PrepareTestReportParameters,{
     Write-Build White "Generating additional test reports: $TestReportTypes"
-    _GenerateTestReport `
-        -BasePath $SourcesDir `
-        -ReportTypes $TestReportTypes `
-        -OutputPath $CoverageDir `
-        -IncludeAssemblyFilter $IncludeAssembliesInCodeCoverage `
-        -ExcludeAssemblyFilter $ExcludeAssembliesInCodeCoverage
+    _GenerateTestReport @ReportGeneratorSplat -ReportTypes $TestReportTypes
 }
 
 # Synopsis: Generates a Markdown code coverage summary report.
-task GenerateMarkdownCodeCoverageSummary -If {$GenerateMarkdownCodeCoverageSummary} {
+task GenerateMarkdownCodeCoverageSummary -If {$GenerateMarkdownCodeCoverageSummary} PrepareTestReportParameters,{
     Write-Build White "Generating Markdown code coverage summary"
 
     # Use the ReportGenerator tool to produce a Markdown summary of the code coverage
     $markdownReportType = $UseGitHubFlavour ? "MarkdownSummaryGitHub" : "MarkdownSummary"
     $markdownReportFilename = $UseGitHubFlavour ? "SummaryGithub.md" : "Summary.md"
-    _GenerateTestReport `
-        -BasePath $SourcesDir `
-        -ReportTypes $markdownReportType `
-        -OutputPath $CoverageDir `
-        -IncludeAssemblyFilter $IncludeAssembliesInCodeCoverage `
-        -ExcludeAssemblyFilter $ExcludeAssembliesInCodeCoverage
+
+    _GenerateTestReport @ReportGeneratorSplat -ReportTypes $markdownReportType
 
     # Update the title so we can distinguish between reports across multiple test runs,
     # when they are published to GitHub as PR comments.
@@ -54,7 +69,7 @@ task GenerateMarkdownCodeCoverageSummary -If {$GenerateMarkdownCodeCoverageSumma
     }
 }
 
-# Synopsis: Handles the scenario where the generated .trx result file would be too large to parse by certain XML libraries
+# Synopsis: Handles the scenario where the generated .trx result file would be too large to parse by certain XML libraries.
 task StripOutputFromLargeTrxFiles -If {$StripOutputFromLargeTrxFiles} {
     # TRX files from large test suites can exceed parsing limits for certain XML libraries, including those used by
     # test result publishers for CI/CD platforms (.e.g The 'publish-unit-test-result-action' GitHub Action).
@@ -130,7 +145,7 @@ task StripOutputFromLargeTrxFiles -If {$StripOutputFromLargeTrxFiles} {
         }
 }
 
-# Synopsis: Handles the scenario where the generated code coverage markdown file would be too big for a GitHub PR comment
+# Synopsis: Handles the scenario where the generated code coverage markdown file would be too big for a GitHub PR comment.
 task TruncateOversizedCoverageReport -If {$TruncateOversizedCoverageReport -and $GenerateMarkdownCodeCoverageSummary} {
     # GitHub PR comments have a 65536 character limit. The coverage summary for this
     # solution often exceeds that. Truncate and append a note when too large.
@@ -153,7 +168,7 @@ task TruncateOversizedCoverageReport -If {$TruncateOversizedCoverageReport -and 
     }
 }
 
-# Synopsis: Generates test coverage reports after .NET tests have been run.
+# Synopsis: Generates test coverage reports after tests have been run.
 task TestReport -If {!$SkipTestReport} `
     -Jobs GenerateTestReport,
             GenerateMarkdownCodeCoverageSummary,

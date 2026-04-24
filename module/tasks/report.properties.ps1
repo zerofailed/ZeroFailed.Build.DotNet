@@ -33,3 +33,18 @@ $TruncateOversizedCoverageReport ??= [Convert]::ToBoolean((property ZF_BUILD_DOT
 
 # Synopsis: The threshold for Markdown code coverage reports (as a character count), above which it will be truncated. Defaults to 60000 characters.
 $TruncateOversizedCoverageReportThreshold ??= 60000
+
+# Synopsis: An optional wildcard expression filter for assemblies that should be included in the code coverage report. Defaults to no filter.
+$IncludeAssembliesInCodeCoverage ??= [string[]]@()
+
+# Synopsis: An optional wildcard expression filter for assemblies that should be excluded from the code coverage report. Defaults to no filter.
+$ExcludeAssembliesInCodeCoverage ??= [string[]]@()
+
+# Synopsis: An optional wildcard expression filter for files that should be included in the code coverage report. Defaults to no filter.
+$IncludeFilesInCodeCoverage ??= [string[]]@()
+
+# Synopsis: An optional wildcard expression filter for files that should be excluded from the code coverage report. Defaults to no filter.
+$ExcludeFilesInCodeCoverage ??= [string[]]@()
+
+# Synopsis: Allows arbitrary arguments to be passed to the reportgenerator tool.
+$ReportGeneratorAdditionalArgs ??= ""
