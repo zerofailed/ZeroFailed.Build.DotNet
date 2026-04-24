@@ -11,6 +11,9 @@
     from Cobertura XML files. It searches for code coverage data in the source directory and, if found, 
     generates the report in the specified output directory.
 
+    .PARAMETER BasePath
+    Specifies the base path used when searching for code coverage output that will be used to generate the report.
+
     .PARAMETER ReportTypes
     Specifies the type of reports to generate. Defaults to the variable $TestReportTypes.
 
