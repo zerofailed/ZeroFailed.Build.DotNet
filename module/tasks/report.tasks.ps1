@@ -4,15 +4,6 @@
 
 . $PSScriptRoot/report.properties.ps1
 
-
-# These tasks should always run even if the build has failed, if the failure was caused by
-# not all tests passing, then any configured test reporting is still required.
-# Setup an OnExitAction that runs a nested build that calls the TestReport tasks.
-$_generateTestReports = {
-    Invoke-Build -File "$PSScriptRoot/report.tasks.ps1" -Task TestReport
-}
-Register-OnExitAction -Action $_generateTestReports
-
 # Synopsis: Configures the core set of reportgenerator command-line arguments
 task PrepareTestReportParameters {
     # Handle the legacy format for the assembly filter properties, where they were passed
