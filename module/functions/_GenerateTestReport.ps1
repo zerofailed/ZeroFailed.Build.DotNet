@@ -25,6 +25,9 @@ function _GenerateTestReport {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
+        [string] $BasePath,
+
+        [Parameter(Mandatory)]
         [string] $ReportTypes,
 
         [Parameter(Mandatory)]
@@ -38,9 +41,9 @@ function _GenerateTestReport {
     )
     Install-DotNetTool -Name "dotnet-reportgenerator-globaltool" -Version $ReportGeneratorToolVersion
 
-    $testReportGlob = "$SourcesDir/**/**/$CodeCoverageFilenameGlob"
+    $testReportGlob = "$BasePath/**/**/$CodeCoverageFilenameGlob"
 
-    if (!(Get-ChildItem -Path $SourceDir -Filter $CodeCoverageFilenameGlob -Recurse)) {
+    if (!(Get-ChildItem -Path $BasePath -Filter $CodeCoverageFilenameGlob -Recurse)) {
         Write-Warning "No code coverage reports found for the file pattern '$testReportGlob' - skipping test report"
     }
     else {

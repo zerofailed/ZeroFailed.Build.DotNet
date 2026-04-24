@@ -18,6 +18,7 @@ task GenerateTestReport -If {$GenerateTestReport} {
         
     Write-Build White "Generating additional test reports: $TestReportTypes"
     _GenerateTestReport `
+        -BasePath $SourcesDir `
         -ReportTypes $TestReportTypes `
         -OutputPath $CoverageDir `
         -IncludeAssemblyFilter $IncludeAssembliesInCodeCoverage `
@@ -32,6 +33,7 @@ task GenerateMarkdownCodeCoverageSummary -If {$GenerateMarkdownCodeCoverageSumma
     $markdownReportType = $UseGitHubFlavour ? "MarkdownSummaryGitHub" : "MarkdownSummary"
     $markdownReportFilename = $UseGitHubFlavour ? "SummaryGithub.md" : "Summary.md"
     _GenerateTestReport `
+        -BasePath $SourcesDir `
         -ReportTypes $markdownReportType `
         -OutputPath $CoverageDir `
         -IncludeAssemblyFilter $IncludeAssembliesInCodeCoverage `
