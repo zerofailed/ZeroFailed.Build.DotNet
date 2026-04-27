@@ -4,18 +4,23 @@
 
 . $PSScriptRoot/test.properties.ps1
 
-# Use the 'OnExitActions' convention provided by the ZF process to ensure that the test log is
-# uploaded to Azure DevOps even if the process has encountered a terminating error.
-$_uploadTestLog = {
-    if ((Test-Path $DotNetTestLogFile) -and $IsAzureDevOps) {
-        Write-Build White "Publishing test log file as Azure Pipeline artifact"
-        Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
-    }
-}
-Register-OnExitAction -Action $_uploadTestLog
-
 # Synopsis: Run .NET solution tests with 'dotnet-coverage' to collect code coverage
 task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
+
+    # Setup tasks that should always run even if the build fails after this point (e.g. because of test failures).
+    # - Upload test logs to ADO
+    $_uploadTestLog = {
+        if ((Test-Path $DotNetTestLogFile) -and $IsAzureDevOps) {
+            Write-Build White "Publishing test log file as Azure Pipeline artifact"
+            Write-Host "##vso[artifact.upload artifactname=logs]$((Resolve-Path $DotNetTestLogFile).Path)"
+        }
+    }
+    Register-OnExitAction -Action $_uploadTestLog
+    # - Generate test reports
+    $_generateTestReports = {
+        Invoke-Build -File "$PSScriptRoot/report.tasks.ps1" -Task TestReport
+    }
+    Register-OnExitAction -Action $_generateTestReports
 
     # Detect Microsoft Testing Platform (MTP) usage
     $isMtp = $false
