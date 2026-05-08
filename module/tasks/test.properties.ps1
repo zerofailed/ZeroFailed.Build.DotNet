@@ -56,3 +56,5 @@ $DotNetTestFileLoggerProps ??= {
         Resolve-Value $DotNetTestFileLoggerProps_VSTest
     }
 }
+# Synopsis: When true, 'dotnet test' will perform a package restore & build before running the tests. Defaults to false.
+$ForceRebuildOnTest ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_FORCE_REBUILD_ON_TEST $false))

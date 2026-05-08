@@ -61,10 +61,16 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     # Setup the arguments we need to pass to 'dotnet test'
     $dotnetTestArgs = @(
         "--configuration", $Configuration
-        "--no-build"
-        "--no-restore"
         "--verbosity", $LogLevel
     )
+
+    if (!$ForceRebuildOnTest) {
+        $dotnetTestArgs += "--no-build"
+        $dotnetTestArgs += "--no-restore"
+    }
+    else {
+        Write-Build Green 'Package restore & rebuild will be performed before running tests, due to $ForceRebuildOnTest=True'
+    }
 
     if ($isMtp) {
         $dotnetTestArgs += _GetDotNetTestParamsForMtp
