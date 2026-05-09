@@ -10,6 +10,9 @@ $SkipDotNetTests ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_SKIP_TESTS $
 # Synopsis: Allows arbitrary arguments to be passed to 'dotnet test'.
 $AdditionalTestArgs ??= @()
 
+# Synopsis: Optional path to a dotnet-coverage settings file. When set, it will be passed to 'dotnet-coverage collect' via '-s'.
+$DotNetCoverageSettingsFile ??= ""
+
 # Synopsis: Optionally specify the target framework moniker to use when running tests.
 $TargetFrameworkMoniker ??= ""
 
