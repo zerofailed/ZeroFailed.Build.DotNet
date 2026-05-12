@@ -83,6 +83,10 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
         "-o", $coverageOutput
         "-f", "cobertura"
     )
+    if ($DotNetCoverageSettingsFile -and (Test-Path $DotNetCoverageSettingsFile)) {
+        Write-Build Green "Using dotnet-coverage settings file: $DotNetCoverageSettingsFile"
+        $dotnetCoverageArgs += @("-s", $DotNetCoverageSettingsFile)
+    }
 
     # Ensure the dotnet-coverage global tool is installed, as we need it to collect the code coverage data
     Install-DotNetTool -Name "dotnet-coverage" -Global
