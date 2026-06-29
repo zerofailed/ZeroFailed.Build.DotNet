@@ -73,7 +73,7 @@ function _GenerateTestReport {
         Write-Warning "No code coverage reports found for the file pattern '$testReportGlob' - skipping test report"
     }
     else {
-        $reportGeneratorArgs = [List[string]]::new()
+        $reportGeneratorArgs = [System.Collections.Generic.List[string]]::new()
         $reportGeneratorArgs.AddRange([string[]]@(
             "-reports:$testReportGlob",
             "-targetdir:$OutputPath",
