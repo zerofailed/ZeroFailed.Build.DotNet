@@ -25,7 +25,7 @@ $TestReportTypes ??= property ZF_BUILD_DOTNET_TEST_REPORT_TYPES "HtmlInline"
 # Synopsis: When true, TRX test results files will have 'Output' elements stripped to reduce their size. Useful when large files are too big to be parsed by XML libraries used by other CI/CD tools. Defaults to false.
 $StripOutputFromLargeTrxFiles ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_STRIP_LARGE_TRX_FILES $false))
 
-# Synopsis: The wildcard expression used to find TRX test results files to be stripped. Defaults to 'test-results_*.trx'.
+# Synopsis: The wildcard expression used to find TRX test results files to be stripped. Matches the default 'LogFilePrefix' of 'test-results' produced by both the VSTest and Microsoft Testing Platform test runners. Defaults to 'test-results_*.trx'.
 $TestResultTrxFilesGlob ??= property ZF_BUILD_DOTNET_TRX_FILES_GLOB "test-results_*.trx"
 
 # Synopsis: When true, Markdown code coverage reports larger than 'TruncateOversizedCoverageReportThreshold' will be truncated. Useful when the Markdown is uploaded to systems that impose size limits (e.g. GitHub PR comments). Defaults to false.

@@ -16,6 +16,12 @@ $DotNetCoverageSettingsFile ??= ""
 # Synopsis: Optionally specify the target framework moniker to use when running tests.
 $TargetFrameworkMoniker ??= ""
 
+# Synopsis: The directory where 'dotnet test' result (.trx) files are written. When empty (the default), each test project writes to its own 'TestResults' folder next to its build output. Set to a path (relative paths are resolved against the repo root) to collect every project's results in a single shared directory.
+$DotNetTestResultsDir ??= property ZF_BUILD_DOTNET_TEST_RESULTS_DIR ""
+if ($DotNetTestResultsDir -and -not [IO.Path]::IsPathRooted($DotNetTestResultsDir)) {
+    $DotNetTestResultsDir = Join-Path $here $DotNetTestResultsDir
+}
+
 # Synopsis: Sets the default 'logger' configuration passed to 'dotnet test'.
 $DotNetTestLoggers ??= @(
     "console;verbosity=$LogLevel"

@@ -9,7 +9,13 @@
     .DESCRIPTION
     Generates the command-line arguments required for using 'dotnet test' with VSTest.
     Directly consumes script-scoped variables expected to be available via the 'RunTestsWithDotNetCoverage'
-    InvokeBuild task.
+    InvokeBuild task ($script:SolutionToBuild, $script:DotNetTestLoggers, $script:DotNetTestResultsDir,
+    $script:_fileLoggerProps).
+
+    When $script:DotNetTestResultsDir is set, '--results-directory' is emitted so all test projects write
+    their results there; when it is empty, no '--results-directory' is passed and each project uses its own
+    'TestResults' folder (the VSTest default). The 'trx' logger's 'LogFilePrefix' already yields a distinct
+    filename per project, so no filename translation is required here.
 
     .EXAMPLE
     $testParams = _GetDotNetTestParamsForVsTest
@@ -34,6 +40,11 @@ function _GetDotNetTestParamsForVsTest {
     Write-Verbose "LoggersBinDir: $binDir" -Verbose
 
     $dotnetTestArgs += "--test-adapter-path", $binDir
+
+    if ($script:DotNetTestResultsDir) {
+        $dotnetTestArgs += "--results-directory", $script:DotNetTestResultsDir
+    }
+
     $dotnetTestArgs += ($script:_fileLoggerProps ? $script:_fileLoggerProps : "/fl")
 
     return $dotnetTestArgs
