@@ -27,6 +27,11 @@ task PrepareTestReportParameters {
         ExcludeFileFilters = $ExcludeFilesInCodeCoverage
         AdditionalArgs = $ReportGeneratorAdditionalArgs
     }
+
+    # Derived once, here, so that 'GenerateMarkdownCodeCoverageSummary' and
+    # 'TruncateOversizedCoverageReport' always agree on the file reportgenerator produces.
+    $script:MarkdownCoverageSummaryReportType = $UseGitHubFlavour ? "MarkdownSummaryGithub" : "MarkdownSummary"
+    $script:MarkdownCoverageSummaryFilename = $UseGitHubFlavour ? "SummaryGithub.md" : "Summary.md"
 }
 
 # Synopsis: Generates additional test reports using 'dotnet-reportgenerator-globaltool'.
@@ -40,14 +45,11 @@ task GenerateMarkdownCodeCoverageSummary -If {$GenerateMarkdownCodeCoverageSumma
     Write-Build White "Generating Markdown code coverage summary"
 
     # Use the ReportGenerator tool to produce a Markdown summary of the code coverage
-    $markdownReportType = $UseGitHubFlavour ? "MarkdownSummaryGitHub" : "MarkdownSummary"
-    $markdownReportFilename = $UseGitHubFlavour ? "SummaryGithub.md" : "Summary.md"
-
-    _GenerateTestReport @ReportGeneratorSplat -ReportTypes $markdownReportType
+    _GenerateTestReport @ReportGeneratorSplat -ReportTypes $MarkdownCoverageSummaryReportType
 
     # Update the title so we can distinguish between reports across multiple test runs,
     # when they are published to GitHub as PR comments.
-    $generatedReportPath = Join-Path $CoverageDir $markdownReportFilename
+    $generatedReportPath = Join-Path $CoverageDir $MarkdownCoverageSummaryFilename
     if (Test-Path $generatedReportPath) {
         $generatedContent = Get-Content -Raw -Path $generatedReportPath
         $testRunOs = if ($IsLinux) { "Linux" } elseif ($IsMacOS) { "MacOS" } else { "Windows" }
@@ -137,13 +139,13 @@ task StripOutputFromLargeTrxFiles -If {$StripOutputFromLargeTrxFiles} {
 }
 
 # Synopsis: Handles the scenario where the generated code coverage markdown file would be too big for a GitHub PR comment.
-task TruncateOversizedCoverageReport -If {$TruncateOversizedCoverageReport -and $GenerateMarkdownCodeCoverageSummary} {
+task TruncateOversizedCoverageReport -If {$TruncateOversizedCoverageReport -and $GenerateMarkdownCodeCoverageSummary} PrepareTestReportParameters,GenerateMarkdownCodeCoverageSummary,{
     # GitHub PR comments have a 65536 character limit. The coverage summary for this
     # solution often exceeds that. Truncate and append a note when too large.
-    # The SummaryGithub.md is generated inside RunTestsWithDotNetCoverage (before
-    # PostTest), so it exists at this point.
-    $summaryPath = Join-Path $CoverageDir "SummaryGithub.md"
-    $maxChars = 60000  # leave headroom for sticky-comment wrapper
+    # The summary is produced by the 'GenerateMarkdownCodeCoverageSummary' task, which is declared as an
+    # explicit dependency above, so the file exists regardless of how this task is invoked.
+    $summaryPath = Join-Path $CoverageDir $MarkdownCoverageSummaryFilename
+    $maxChars = $TruncateOversizedCoverageReportThreshold  # leave headroom for sticky-comment wrapper
     if (Test-Path $summaryPath) {
         $content = Get-Content -Raw -Path $summaryPath
         if ($content.Length -gt $maxChars) {
