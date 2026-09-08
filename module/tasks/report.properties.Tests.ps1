@@ -10,9 +10,12 @@ BeforeAll {
     function Get-ReportProperty {
         param (
             [string] $Name,
-            # Defaults to the state every real build is in when this properties file loads: ZeroFailed.DevOps.Common
-            # is imported first and its 'cicd-server.properties.ps1' defines '$IsGitHubActions = $false'. Only the
+            # Mirrors the state every real build is in when this properties file loads: ZeroFailed.DevOps.Common
+            # is imported first and its 'cicd-server.properties.ps1' defines '$IsGitHubActions = $false'; only the
             # 'DetectCICDServer' task, which runs after every extension has been imported, sets it to $true.
+            # The variable is always defined, never left undefined: when 'RunPesterTests' runs inside a ZeroFailed
+            # build, the build's own '$IsGitHubActions' is visible to these tests through the scope chain, so the
+            # helper has to shadow it to control the scenario at all.
             [object] $IsGitHubActions = $false,
             [hashtable] $EnvironmentVariables = @{}
         )
@@ -63,13 +66,6 @@ Describe 'report.properties' {
             # never fell through to the GITHUB_ACTIONS environment check.
             Get-ReportProperty -Name UseGitHubFlavour `
                                -IsGitHubActions $false `
-                               -EnvironmentVariables @{ GITHUB_ACTIONS = 'true'; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null } |
-                Should -BeTrue
-        }
-
-        It 'should be true on GitHub Actions when $IsGitHubActions has not been defined at all' {
-            Get-ReportProperty -Name UseGitHubFlavour `
-                               -IsGitHubActions $null `
                                -EnvironmentVariables @{ GITHUB_ACTIONS = 'true'; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null } |
                 Should -BeTrue
         }
