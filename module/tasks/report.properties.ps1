@@ -16,8 +16,11 @@ $GenerateTestReport ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_GENERATE_
 # Synopsis: When true, runs the 'dotnet-reportgenerator-globaltool' to generate a Markdown code coverage summary. Defaults to true.
 $GenerateMarkdownCodeCoverageSummary ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_GENERATE_MARKDOWN_COVERAGE_REPORT $true))
 
+# NOTE: Deliberately reads the environment rather than '$IsGitHubActions'. Properties files run when the extension is
+# imported, by which point ZeroFailed.DevOps.Common has already defined '$IsGitHubActions' as $false; only the later
+# 'DetectCICDServer' task sets it to $true. See https://github.com/zerofailed/ZeroFailed.Build.DotNet/issues/35
 # Synopsis: When true, the Markdown code coverage summary is generated in the GitHub-optimised format ('SummaryGithub.md'), which is the file the shared 'Add Code Coverage PR comment' action looks for. Defaults to true when running on GitHub Actions.
-$UseGitHubFlavour ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR ($IsGitHubActions ?? ($env:GITHUB_ACTIONS -eq 'true'))))
+$UseGitHubFlavour ??= [Convert]::ToBoolean((property ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR ($env:GITHUB_ACTIONS -eq 'true')))
 
 # Synopsis: Allows the version of the 'dotnet-reportgenerator-globaltool' to be customised. Defaults to "5.3.8".
 $ReportGeneratorToolVersion ??= "5.3.8"
