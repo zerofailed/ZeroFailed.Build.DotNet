@@ -10,7 +10,10 @@ BeforeAll {
     function Get-ReportProperty {
         param (
             [string] $Name,
-            [object] $IsGitHubActions,
+            # Defaults to the state every real build is in when this properties file loads: ZeroFailed.DevOps.Common
+            # is imported first and its 'cicd-server.properties.ps1' defines '$IsGitHubActions = $false'. Only the
+            # 'DetectCICDServer' task, which runs after every extension has been imported, sets it to $true.
+            [object] $IsGitHubActions = $false,
             [hashtable] $EnvironmentVariables = @{}
         )
 
@@ -49,38 +52,44 @@ Describe 'report.properties' {
 
         It 'should always be defined as a boolean, never left null' {
             $result = Get-ReportProperty -Name UseGitHubFlavour `
-                                         -IsGitHubActions $null `
                                          -EnvironmentVariables @{ GITHUB_ACTIONS = $null; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null }
             $result | Should -BeOfType [bool]
             $result | Should -BeFalse
         }
 
-        It 'should be true when running on GitHub Actions' {
+        It 'should be true on GitHub Actions even though $IsGitHubActions is still $false when the properties load' {
+            # Regression test for https://github.com/zerofailed/ZeroFailed.Build.DotNet/issues/35: DevOps.Common
+            # defines '$IsGitHubActions = $false' before this file is loaded, so a default that read the variable
+            # never fell through to the GITHUB_ACTIONS environment check.
             Get-ReportProperty -Name UseGitHubFlavour `
-                               -IsGitHubActions $true `
-                               -EnvironmentVariables @{ ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null } |
+                               -IsGitHubActions $false `
+                               -EnvironmentVariables @{ GITHUB_ACTIONS = 'true'; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null } |
                 Should -BeTrue
         }
 
-        It 'should be false when running elsewhere' {
-            Get-ReportProperty -Name UseGitHubFlavour `
-                               -IsGitHubActions $false `
-                               -EnvironmentVariables @{ GITHUB_ACTIONS = $null; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null } |
-                Should -BeFalse
-        }
-
-        It 'should fall back to the GITHUB_ACTIONS environment variable' {
+        It 'should be true on GitHub Actions when $IsGitHubActions has not been defined at all' {
             Get-ReportProperty -Name UseGitHubFlavour `
                                -IsGitHubActions $null `
                                -EnvironmentVariables @{ GITHUB_ACTIONS = 'true'; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null } |
                 Should -BeTrue
         }
 
-        It 'should be overridable via ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR' {
+        It 'should be false when running elsewhere' {
             Get-ReportProperty -Name UseGitHubFlavour `
-                               -IsGitHubActions $true `
-                               -EnvironmentVariables @{ ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = 'false' } |
+                               -EnvironmentVariables @{ GITHUB_ACTIONS = $null; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = $null } |
                 Should -BeFalse
+        }
+
+        It 'should be overridable to false via ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR on GitHub Actions' {
+            Get-ReportProperty -Name UseGitHubFlavour `
+                               -EnvironmentVariables @{ GITHUB_ACTIONS = 'true'; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = 'false' } |
+                Should -BeFalse
+        }
+
+        It 'should be overridable to true via ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR when running elsewhere' {
+            Get-ReportProperty -Name UseGitHubFlavour `
+                               -EnvironmentVariables @{ GITHUB_ACTIONS = $null; ZF_BUILD_DOTNET_USE_GITHUB_FLAVOUR = 'true' } |
+                Should -BeTrue
         }
     }
 }
