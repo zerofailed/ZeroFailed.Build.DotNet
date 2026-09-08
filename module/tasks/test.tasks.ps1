@@ -56,7 +56,7 @@ task RunTestsWithDotNetCoverage -If {$SolutionToBuild} {
     }
 
     # Evaluate the file logger properties so we can pass them to 'dotnet test'
-    $_fileLoggerProps = Resolve-Value $DotNetTestFileLoggerProps
+    $script:_fileLoggerProps = Resolve-Value $DotNetTestFileLoggerProps
 
     # Setup the arguments we need to pass to 'dotnet test'
     $dotnetTestArgs = @(
