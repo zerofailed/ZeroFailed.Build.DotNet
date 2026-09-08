@@ -17,11 +17,12 @@ BeforeAll {
     function Get-TestFileLoggerProps {
         param (
             [bool] $IsMtp,
-            [string] $FileLoggerVerbosity = 'normal'
+            [string] $FileLoggerVerbosity = 'normal',
+            [string] $VerbosityAfterImport
         )
 
         & {
-            param($path, $mtp, $verbosity)
+            param($path, $mtp, $verbosity, $verbosityAfterImport)
 
             # Stand-in for the InvokeBuild 'property' command, which only exists during a build
             function property {
@@ -43,8 +44,12 @@ BeforeAll {
             $isMtp = $mtp
 
             . $path
+
+            # Simulates a consumer overriding the verbosity after the extension's properties have been loaded
+            if ($verbosityAfterImport) { $DotNetFileLoggerVerbosity = $verbosityAfterImport }
+
             [string[]](Resolve-Value $DotNetTestFileLoggerProps)
-        } $propertiesPath $IsMtp $FileLoggerVerbosity
+        } $propertiesPath $IsMtp $FileLoggerVerbosity $VerbosityAfterImport
     }
 }
 
@@ -100,6 +105,19 @@ Describe 'test.properties' {
 
         It 'uses the MSBuild file logger' {
             Get-TestFileLoggerProps -IsMtp $false | Should -Be '/flp:verbosity=normal;logfile=dotnet-test.log'
+        }
+    }
+
+    Context 'DotNetTestFileLoggerProps lazy evaluation' {
+
+        It 'honours a DotNetFileLoggerVerbosity override applied after the properties are loaded when using VSTest' {
+            Get-TestFileLoggerProps -IsMtp $false -VerbosityAfterImport 'detailed' |
+                Should -Be '/flp:verbosity=detailed;logfile=dotnet-test.log'
+        }
+
+        It 'honours a DotNetFileLoggerVerbosity override applied after the properties are loaded when using the Microsoft Testing Platform' {
+            $props = Get-TestFileLoggerProps -IsMtp $true -VerbosityAfterImport 'detailed'
+            Get-ArgValue $props '--diagnostic-verbosity' | Should -Be 'Information'
         }
     }
 }
