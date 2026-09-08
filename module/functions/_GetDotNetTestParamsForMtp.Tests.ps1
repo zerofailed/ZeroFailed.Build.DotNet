@@ -104,4 +104,19 @@ Describe '_GetDotNetTestParamsForMtp' {
             _GetDotNetTestParamsForMtp | Should -Not -Contain '--report-trx'
         }
     }
+
+    Context 'With file logger properties configured' {
+
+        BeforeAll {
+            $script:DotNetTestLoggers = @("trx;LogFilePrefix=test-results")
+            $script:_fileLoggerProps = @('--diagnostic', '--diagnostic-verbosity', 'Warning')
+        }
+
+        AfterAll { $script:_fileLoggerProps = $null }
+
+        It 'appends the file logger properties after the test platform arguments' {
+            $result = [string[]](_GetDotNetTestParamsForMtp)
+            $result[-3..-1] | Should -Be @('--diagnostic', '--diagnostic-verbosity', 'Warning')
+        }
+    }
 }
