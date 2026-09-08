@@ -35,7 +35,7 @@ $DisableCicdServerLogger ??= $false
 $DotNetTestLogFile ??= "dotnet-test.log"
 
 # Synopsis: The file logger properties passed to 'dotnet test' when using the VSTest platform. Defaults to "/flp:verbosity=<DotNetFileLoggerVerbosity>;logfile=<DotNetTestLogFile>". Supports lazy evaluation.
-$DotNetTestFileLoggerProps_VSTest ??= "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetTestLogFile"
+$DotNetTestFileLoggerProps_VSTest ??= { "/flp:verbosity=$DotNetFileLoggerVerbosity;logfile=$DotNetTestLogFile" }
 
 # Synopsis: The diagnostic logging arguments passed to 'dotnet test' when using the Microsoft Testing Platform. Defaults to enabling the MTP diagnostic file logger, with a verbosity derived from 'DotNetFileLoggerVerbosity' and the '.diag' files written to the repo root. Supports lazy evaluation.
 $DotNetTestFileLoggerProps_MTP ??= {
