@@ -14,7 +14,7 @@ This group contains functionality for running analysis tools against .NET projec
 | `CovenantIncludeCycloneDxReport` | $false        |              | When true, an CycloneDx-formatted SBOM will be generated from the Covenant report |
 | `CovenantIncludeSpdxReport`      | $true         |              | When true, an SPDX-formatted SBOM will be generated from the Covenant report      |
 | `CovenantMetadata`               | see below     |              | A hashtable of additional metadata to be included in the Covenant report          |
-| `covenantVersion`                | "0.20.0"      |              | The version of the Covenant .NET global tool to install                           |
+| `covenantVersion`                | "0.30.0"      |              | The version of the Covenant .NET global tool to install                           |
 
 The default Covenant Metadata is attempted to be derived using the `git` & `gh` command-line tools to produce the following:
 ```
