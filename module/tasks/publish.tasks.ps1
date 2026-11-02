@@ -17,10 +17,26 @@ task PublishNuGetPackages `
     Write-Verbose "NugetPackagesToPublish: $nugetPackagesToPublish"
 
     # Derive the NuGet API key to use - this also makes it easier to mask later on
-    # NOTE: Where NuGet auth has been setup beforehand (e.g. via a SOURCE), an API key still needs to be specified but it can be any value
-    $nugetApiKey = $env:NUGET_API_KEY ? $env:NUGET_API_KEY : "no-key"
-    if (([uri]$NugetPublishSource).scheme -ne 'file' -and $nugetApiKey -eq "no-key") {
-        Write-Warning "No value was found in the 'NUGET_API_KEY' environment variable, publishing may fail unless an explicit NuGet 'source' has been pre-configured."
+    if ($NugetPublishUseTrustedPublishing) {
+        if (!$nugetPackagesToPublish) {
+            # Avoid consuming an OIDC token when there is nothing to publish
+            Write-Build Yellow "No NuGet packages found to publish - skipping Trusted Publishing token exchange"
+            return
+        }
+        if ($env:NUGET_API_KEY) {
+            Write-Warning "Both Trusted Publishing and the 'NUGET_API_KEY' environment variable are configured - Trusted Publishing will be used."
+        }
+        $nugetApiKey = _GetNuGetTrustedPublishingApiKey -Username $NugetTrustedPublishingUsername `
+                                                        -TokenEndpoint $NugetTrustedPublishingTokenEndpoint `
+                                                        -Audience $NugetTrustedPublishingAudience
+        Write-Build Green "Obtained temporary NuGet API key via Trusted Publishing"
+    }
+    else {
+        # NOTE: Where NuGet auth has been setup beforehand (e.g. via a SOURCE), an API key still needs to be specified but it can be any value
+        $nugetApiKey = $env:NUGET_API_KEY ? $env:NUGET_API_KEY : "no-key"
+        if (([uri]$NugetPublishSource).scheme -ne 'file' -and $nugetApiKey -eq "no-key") {
+            Write-Warning "No value was found in the 'NUGET_API_KEY' environment variable, publishing may fail unless an explicit NuGet 'source' has been pre-configured."
+        }
     }
 
     # Setup the 'dotnet nuget push' command-line parameters that will be the same for each package

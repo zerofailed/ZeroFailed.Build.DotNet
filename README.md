@@ -104,3 +104,25 @@ task . FullBuild
 
 For an end-to-end example of using this extension to build a .NET project, please take a look at [this sample repo](https://github.com/zerofailed/ZeroFailed.Sample.Build.DotNet).
 
+### Publishing to NuGet.org with Trusted Publishing
+
+The `PublishNuGetPackages` task can authenticate to NuGet.org with [Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing), so you do not need to store a long-lived API key. The build gets an OIDC token from GitHub Actions and exchanges it with NuGet.org for an API key that is valid for 1 hour. Only GitHub Actions is supported.
+
+1. On NuGet.org, select your username, then **Trusted Publishing**. Add a policy with the repository owner, the repository name and the workflow file name (for example `build.yml`, without the `.github/workflows/` path). You can also add a GitHub Actions environment.
+2. Give the GitHub Actions job that runs the build permission to request an OIDC token:
+
+    ```yaml
+    permissions:
+      id-token: write
+    ```
+
+3. Set these environment variables for the build:
+
+    | Variable                                          | Value                                                                 |
+    | ------------------------------------------------- | --------------------------------------------------------------------- |
+    | `ZF_BUILD_DOTNET_NUGET_USE_TRUSTED_PUBLISHING`    | `true`                                                                |
+    | `ZF_BUILD_DOTNET_NUGET_TRUSTED_PUBLISHING_USER`   | The NuGet.org username (profile name, not email address) that owns the policy |
+    | `ZF_BUILD_DOTNET_NUGET_PUBLISH_SOURCE`            | `https://api.nuget.org/v3/index.json`                                 |
+
+When Trusted Publishing is enabled, the `NUGET_API_KEY` environment variable is not used.
+
