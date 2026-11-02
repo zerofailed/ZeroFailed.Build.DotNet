@@ -126,6 +126,10 @@ This group contains features for publishing NuGet packages.
 | `NugetPublishSkipDuplicates`     | $true                                        |              | When true, the NuGet publisher will skip publishing packages that already exist in the target feed. Defaults to 'true'.                                                                    |
 | `NugetPublishSource`             | "$here/_local-nuget-feed"                    |              | Sets the NuGet source to publish to. Defaults to a file-system based feed located in a directory named '_local-nuget-feed' located alongside the build script.                             |
 | `NugetPublishSymbolSource`       | ""                                           |              | Allows the target NuGet symbol source to be customised. Defaults to an empty string, which means that symbols will use the same source as the packages.                                    |
+| `NugetPublishUseTrustedPublishing` | $false                                     |              | When true, a short-lived NuGet API key is obtained via NuGet.org Trusted Publishing (GitHub Actions OIDC), instead of using the 'NUGET_API_KEY' environment variable. Requires the GitHub Actions job to have the 'id-token: write' permission. Defaults to 'false'. |
+| `NugetTrustedPublishingAudience` | "https://www.nuget.org"                      |              | The audience requested for the GitHub Actions OIDC token used with NuGet.org Trusted Publishing. Defaults to 'https://www.nuget.org'.                                                      |
+| `NugetTrustedPublishingTokenEndpoint` | "https://www.nuget.org/api/v2/token"    |              | The NuGet.org endpoint used to exchange an OIDC token for a short-lived API key. Defaults to 'https://www.nuget.org/api/v2/token'.                                                          |
+| `NugetTrustedPublishingUsername` | ""                                           |              | The NuGet.org username (profile name, not email address) that owns the Trusted Publishing policy. Required when 'NugetPublishUseTrustedPublishing' is enabled.                             |
 
 ### Tasks
 
